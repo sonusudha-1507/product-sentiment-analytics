@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether NLP Engine — Enterprise Text Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="workspace">
+        <header class="workspace-header">
+            <div class="meta-tag">SYSTEM SYSTEM OPERATIONAL // V2.4</div>
+            <h1>AETHER <span class="thin">NLP</span></h1>
+            <p class="description">Bespoke text mining interface for real-time sentiment intelligence extraction.</p>
+        </header>
+
+        <main class="grid-layout">
+            <div class="glass-card deck-input">
+                <div class="card-edge-highlight"></div>
+                <h3>Text Ingestion Stream</h3>
+                <div class="textarea-wrapper">
+                    <textarea id="review-input" placeholder="Paste complex raw feedback transcripts here to run deep multi-layered NLP mining operations..."></textarea>
+                </div>
+                <button id="analyze-btn" class="glow-action-btn">
+                    <span>COMPILE COGNITIVE MATRIX</span>
+                </button>
+            </div>
+
+            <div class="glass-card deck-telemetry">
+                <div class="card-edge-highlight"></div>
+                <h3>Analytics Visualization</h3>
+                
+                <div id="idle-telemetry" class="fallback-state">
+                    <div class="radar-pulse"></div>
+                    <p>Awaiting ingestion data arrays...</p>
+                </div>
+
+                <div id="active-telemetry" class="hidden">
+                    <div class="metric-row">
+                        <div class="mini-card">
+                            <span class="label">CLASSIFICATION</span>
+                            <div id="sentiment-output" class="metric-value">NEUTRAL</div>
+                        </div>
+                        <div class="mini-card">
+                            <span class="label">CONFIDENCE MATRIX</span>
+                            <div id="confidence-output" class="metric-value">00.0%</div>
+                        </div>
+                    </div>
+
+                    <div class="topic-mining-block">
+                        <span class="label">MINED TOPIC CLUSTERS</span>
+                        <div id="topic-tags" class="tag-field"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('analyze-btn').addEventListener('click', async () => {
+            const text = document.getElementById('review-input').value.trim();
+            if(!text) return;
+
+            const btn = document.getElementById('analyze-btn');
+            btn.classList.add('processing');
+            
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            const data = await response.json();
+            
+            btn.classList.remove('processing');
+
+            if(data.success) {
+                document.getElementById('idle-telemetry').classList.add('hidden');
+                const activeView = document.getElementById('active-telemetry');
+                activeView.classList.remove('hidden');
+                activeView.classList.add('fade-in-up');
+
+                const sentOut = document.getElementById('sentiment-output');
+                sentOut.innerText = data.sentiment;
+                sentOut.className = 'metric-value ' + (data.sentiment === 'Positive' ? 'txt-positive' : 'txt-negative');
+
+                document.getElementById('confidence-output').innerText = `${data.confidence}%`;
+
+                const tagField = document.getElementById('topic-tags');
+                tagField.innerHTML = '';
+                data.themes.forEach(t => {
+                    const tag = document.createElement('span');
+                    tag.className = 'cyber-tag';
+                    tag.innerText = t;
+                    tagField.appendChild(tag);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
